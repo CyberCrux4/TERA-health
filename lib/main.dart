@@ -17,7 +17,7 @@ class TeraApp extends StatelessWidget {
         ),
         body: const Center(
           child: Text(
-            'TERA HEALTH',
+            'HI HERE',
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
