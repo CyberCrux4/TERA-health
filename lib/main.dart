@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/home/home.dart';
 
 void main() {
   runApp(const TeraApp());
@@ -11,20 +12,8 @@ class TeraApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('TERA Health'),
-        ),
-        body: const Center(
-          child: Text(
-            'HI HERE',
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
+      title: 'TERA Health',
+      home: const Home(),
     );
   }
 }
