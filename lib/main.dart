@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home/home.dart';
+import 'screens/splash/splash_screen.dart';
 
 void main() {
   runApp(const TeraApp());
@@ -13,7 +13,7 @@ class TeraApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TERA Health',
-      home: const Home(),
+      home: const SplashScreen(),
     );
   }
 }
