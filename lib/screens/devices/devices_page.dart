@@ -1,376 +1,374 @@
 import 'package:flutter/material.dart';
 
-const Color primaryBlue = Color(0xFF5554D9);
-const Color darkText = Color(0xFF202124);
-const Color lightBackground = Color(0xFFF7F8FC);
-
 class DevicesPage extends StatelessWidget {
   const DevicesPage({super.key});
+
+  static const Color primaryBlue = Color(0xFF5756E9);
+  static const Color darkText = Color(0xFF202124);
+  static const Color lightBg = Color(0xFFF7F8FC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: lightBackground,
-      appBar: AppBar(
-        backgroundColor: lightBackground,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: primaryBlue,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Column(
+      backgroundColor: lightBg,
+
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'AAGIS Device',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: primaryBlue,
+            // =========================
+            // TOP BAR
+            // =========================
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(
+                      Icons.arrow_back_ios_new,
+                      size: 20,
+                    ),
+                  ),
+
+                  const Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          'AAGIS Device',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: darkText,
+                          ),
+                        ),
+                        Text(
+                          'Your connected safety watch',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Icon(
+                    Icons.settings_outlined,
+                    color: primaryBlue,
+                  ),
+                ],
               ),
             ),
-            Text(
-              'Your connected safety watch',
+
+            // =========================
+            // CONTENT
+            // =========================
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+
+                    // WATCH CARD
+                    _watchCard(),
+
+                    const SizedBox(height: 18),
+
+                    // HEART RATE CARD
+                    _heartRateCard(context),
+
+                    const SizedBox(height: 18),
+
+                    // DEVICE STATUS
+                    _deviceStatusCard(),
+
+                    const SizedBox(height: 18),
+
+                    // EMERGENCY CONTACTS
+                    _emergencyContactsCard(),
+
+                    const SizedBox(height: 18),
+
+                    // LOCATION
+                    _locationCard(),
+
+                    const SizedBox(height: 18),
+
+                    // DEVICE SETTINGS
+                    _settingsCard(),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+
+            // =========================
+            // BOTTOM NAVIGATION
+            // =========================
+            _bottomNavigation(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+ // ============================================================
+// WATCH CARD
+// ============================================================
+
+Widget _watchCard() {
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: _cardDecoration(),
+    child: Column(
+      children: [
+        // Watch Image
+       Container(
+  width: 170,
+  height: 170,
+  decoration: const BoxDecoration(
+    shape: BoxShape.circle,
+    color: Color(0xFFEAF4FF),
+          ),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/images/tera_watch.png',
+              width: 140,
+              height: 140,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 10),
+
+        const Text(
+          'AAGIS Watch',
+          style: TextStyle(
+            fontSize: 19,
+            fontWeight: FontWeight.w700,
+            color: darkText,
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: const BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 5),
+            const Text(
+              'Connected to TERA Health',
               style: TextStyle(
-                fontSize: 9,
+                fontSize: 11,
                 color: Colors.grey,
               ),
             ),
           ],
         ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.settings_outlined,
-              color: primaryBlue,
-            ),
-            onPressed: () {},
+
+        const SizedBox(height: 8),
+
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
           ),
-        ],
-      ),
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 25),
-          child: Column(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F1F1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // --------------------------------------------------
-              // AAGIS WATCH CARD
-              // --------------------------------------------------
-              _watchCard(),
-
-              const SizedBox(height: 20),
-
-              // --------------------------------------------------
-              // HEART RATE MONITORING
-              // --------------------------------------------------
-              _heartRateCard(),
-
-              const SizedBox(height: 16),
-
-              // --------------------------------------------------
-              // DEVICE STATUS
-              // --------------------------------------------------
-              _deviceStatusCard(),
-
-              const SizedBox(height: 16),
-
-              // --------------------------------------------------
-              // EMERGENCY CONTACTS
-              // --------------------------------------------------
-              _emergencyContactsCard(),
-
-              const SizedBox(height: 16),
-
-              // --------------------------------------------------
-              // EMERGENCY LOCATION
-              // --------------------------------------------------
-              _emergencyLocationCard(),
-
-              const SizedBox(height: 22),
-
-              // --------------------------------------------------
-              // DEVICE SETTINGS
-              // --------------------------------------------------
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'DEVICE SETTINGS',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
-                    letterSpacing: 0.5,
-                  ),
+              Icon(
+                Icons.battery_full,
+                size: 15,
+                color: Colors.green,
+              ),
+              SizedBox(width: 5),
+              Text(
+                '82% Battery',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-
-              const SizedBox(height: 8),
-
-              _settingsCard(),
             ],
           ),
         ),
-      ),
-    );
-  }
 
-  // ==============================================================
-  // WATCH CARD
-  // ==============================================================
+        const SizedBox(height: 12),
 
-  Widget _watchCard() {
-    return _card(
-      child: Column(
-        children: [
-          Container(
-            width: 105,
-            height: 105,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF1F2F5),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.watch,
-              size: 65,
-              color: Colors.black87,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          const Text(
-            'AAGIS Watch',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: darkText,
-            ),
-          ),
-
-          const SizedBox(height: 4),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 7,
-                height: 7,
-                decoration: const BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
+        SizedBox(
+          width: double.infinity,
+          height: 42,
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryBlue,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(9),
               ),
-              const SizedBox(width: 5),
-              const Text(
-                'Connected to TERA Health',
+            ),
+            child: const Text(
+              'Manage Device',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+  // ============================================================
+// HEART RATE
+// ============================================================
+
+Widget _heartRateCard(BuildContext context) {
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(14),
+    decoration: _cardDecoration(),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Text(
+              '❤️',
+              style: TextStyle(
+                fontSize: 13,
+              ),
+            ),
+            SizedBox(width: 3),
+            Text(
+              'Heart Rate Monitoring',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 8),
+
+        const Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '78',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(width: 4),
+            Padding(
+              padding: EdgeInsets.only(bottom: 4),
+              child: Text(
+                'BPM',
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 9,
                   color: Colors.grey,
                 ),
               ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
             ),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F1F4),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.battery_5_bar,
-                  size: 14,
-                  color: Colors.green,
-                ),
-                SizedBox(width: 4),
-                Text(
-                  '82% Battery',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: darkText,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ],
+        ),
 
-          const SizedBox(height: 15),
-
-          SizedBox(
-            width: double.infinity,
-            height: 40,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryBlue,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(9),
-                ),
+        const Row(
+          children: [
+            Icon(
+              Icons.circle,
+              size: 7,
+              color: Colors.green,
+            ),
+            SizedBox(width: 4),
+            Text(
+              'Monitoring',
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.green,
               ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 8),
+
+        SizedBox(
+          height: 55,
+          width: double.infinity,
+          child: CustomPaint(
+            painter: _HeartRatePainter(),
+          ),
+        ),
+
+        const Divider(),
+
+        Row(
+          children: [
+            const Text(
+              'Last updated: Just now',
+              style: TextStyle(
+                fontSize: 9,
+                color: Colors.grey,
+              ),
+            ),
+
+            const Spacer(),
+
+            GestureDetector(
+              onTap: () {},
               child: const Text(
-                'Manage Device',
+                'View Heart Rate →',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 9,
+                  color: primaryBlue,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==============================================================
-  // HEART RATE CARD
-  // ==============================================================
-
-  Widget _heartRateCard() {
-    return _card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(
-                Icons.favorite,
-                color: Colors.red,
-                size: 16,
-              ),
-              Text(
-                ' Heart Rate Monitoring',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: darkText,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          const Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '78',
-                style: TextStyle(
-                  fontSize: 27,
-                  fontWeight: FontWeight.w700,
-                  color: darkText,
-                ),
-              ),
-              SizedBox(width: 4),
-              Padding(
-                padding: EdgeInsets.only(bottom: 5),
-                child: Text(
-                  'BPM',
-                  style: TextStyle(
-                    fontSize: 9,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 2),
-
-          const Row(
-            children: [
-              Icon(
-                Icons.circle,
-                size: 7,
-                color: Colors.green,
-              ),
-              SizedBox(width: 4),
-              Text(
-                'Monitoring',
-                style: TextStyle(
-                  fontSize: 9,
-                  color: Colors.green,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          SizedBox(
-            height: 45,
-            width: double.infinity,
-            child: CustomPaint(
-              painter: _HeartLinePainter(),
-            ),
-          ),
-
-          const Divider(),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Last updated: Just now',
-                style: TextStyle(
-                  fontSize: 8,
-                  color: Colors.grey,
-                ),
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: const Text(
-                  'View Heart Rate →',
-                  style: TextStyle(
-                    fontSize: 9,
-                    color: primaryBlue,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==============================================================
+          ],
+        ),
+      ],
+    ),
+  );
+}
+  // ============================================================
   // DEVICE STATUS
-  // ==============================================================
+  // ============================================================
 
   Widget _deviceStatusCard() {
-    return _card(
+    return _sectionCard(
+      title: 'Device Status',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Device Status',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: darkText,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
           _statusRow(
             Icons.bluetooth,
             'Connection',
@@ -403,6 +401,237 @@ class DevicesPage extends StatelessWidget {
     );
   }
 
+  // ============================================================
+  // EMERGENCY CONTACTS
+  // ============================================================
+
+  Widget _emergencyContactsCard() {
+    return _sectionCard(
+      title: 'Emergency Contacts',
+      child: Column(
+        children: [
+          _contactTile(
+            'JD',
+            'John Doe',
+            'Spouse',
+            const Color(0xFF5D6DEB),
+          ),
+
+          const SizedBox(height: 7),
+
+          _contactTile(
+            'JS',
+            'Jane Smith',
+            'Sister',
+            const Color(0xFF4E8BEF),
+          ),
+
+          const SizedBox(height: 7),
+
+          _contactTile(
+            'DM',
+            'Dr. Miller',
+            'Doctor',
+            const Color(0xFF16875F),
+          ),
+
+          const SizedBox(height: 10),
+
+          _smallButton(
+            'Manage Contacts →',
+            () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // LOCATION
+  // ============================================================
+
+  Widget _locationCard() {
+    return _sectionCard(
+      title: 'Emergency Location',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0F1F4),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: Colors.blue,
+                  size: 17,
+                ),
+                SizedBox(width: 7),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Location sharing: Enabled',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Your location will be shared with emergency contacts when SOS is activated.',
+                        style: TextStyle(
+                          fontSize: 8,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          Container(
+            height: 90,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE4E9F2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.location_on,
+                color: Colors.blue,
+                size: 35,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          _smallButton(
+            'Location Settings →',
+            () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // SETTINGS
+  // ============================================================
+
+  Widget _settingsCard() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(
+            left: 5,
+            bottom: 8,
+          ),
+          child: Text(
+            'DEVICE SETTINGS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+
+        Container(
+          decoration: _cardDecoration(),
+          child: Column(
+            children: [
+              _settingRow(
+                Icons.notifications_none,
+                'Notifications',
+              ),
+
+              _settingRow(
+                Icons.location_on_outlined,
+                'Location Services',
+              ),
+
+              _settingRow(
+                Icons.tune,
+                'Health Monitoring',
+              ),
+
+              _settingRow(
+                Icons.battery_saver,
+                'Battery Optimization',
+              ),
+
+              _settingRow(
+                Icons.sync,
+                'Sync Device',
+              ),
+
+              _settingRow(
+                Icons.help_outline,
+                'Help & Support',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: const Color(0xFFD9DAE0),
+      ),
+    );
+  }
+
+  Widget _sectionCard({
+    required String title,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          child,
+        ],
+      ),
+    );
+  }
+
   Widget _statusRow(
     IconData icon,
     String title,
@@ -410,14 +639,14 @@ class DevicesPage extends StatelessWidget {
     Color color,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 9),
       child: Row(
         children: [
           Container(
             width: 25,
             height: 25,
             decoration: const BoxDecoration(
-              color: Color(0xFFF2F3F6),
+              color: Color(0xFFF1F2F4),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -427,15 +656,16 @@ class DevicesPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(width: 9),
+          const SizedBox(width: 8),
 
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 8,
+                  fontSize: 9,
                   color: Colors.grey,
                 ),
               ),
@@ -444,62 +674,10 @@ class DevicesPage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   color: color,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==============================================================
-  // EMERGENCY CONTACTS
-  // ==============================================================
-
-  Widget _emergencyContactsCard() {
-    return _card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Emergency Contacts',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: darkText,
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          _contactTile(
-            'JD',
-            'John Doe',
-            'Spouse',
-            const Color(0xFF5D62D8),
-          ),
-
-          _contactTile(
-            'JS',
-            'Jane Smith',
-            'Sister',
-            const Color(0xFF5590E8),
-          ),
-
-          _contactTile(
-            'DM',
-            'Dr. Miller',
-            'Doctor',
-            const Color(0xFF11805F),
-          ),
-
-          const SizedBox(height: 8),
-
-          _greyButton(
-            'Manage Contacts →',
-            () {},
           ),
         ],
       ),
@@ -513,26 +691,30 @@ class DevicesPage extends StatelessWidget {
     Color color,
   ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.all(7),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFFF7F8FA),
-        border: Border.all(
-          color: const Color(0xFFE0E1E5),
-        ),
         borderRadius: BorderRadius.circular(7),
+        border: Border.all(
+          color: const Color(0xFFE1E2E5),
+        ),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 13,
-            backgroundColor: color,
-            child: Text(
-              initials,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 8,
-                fontWeight: FontWeight.w600,
+          Container(
+            width: 25,
+            height: 25,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  fontSize: 9,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -540,12 +722,13 @@ class DevicesPage extends StatelessWidget {
           const SizedBox(width: 8),
 
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               Text(
                 name,
                 style: const TextStyle(
-                  fontSize: 9,
+                  fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -563,168 +746,56 @@ class DevicesPage extends StatelessWidget {
     );
   }
 
-  // ==============================================================
-  // EMERGENCY LOCATION
-  // ==============================================================
-
-  Widget _emergencyLocationCard() {
-    return _card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Emergency Location',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: darkText,
-            ),
+  Widget _smallButton(
+    String text,
+    VoidCallback onPressed,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      height: 35,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFF4F5F7),
+          elevation: 0,
+          foregroundColor: darkText,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(9),
           ),
-
-          const SizedBox(height: 10),
-
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F1F4),
-              borderRadius: BorderRadius.circular(7),
-            ),
-            child: const Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.location_on,
-                  size: 16,
-                  color: Colors.blue,
-                ),
-                SizedBox(width: 7),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Location sharing: Enabled',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Your location will be shared with emergency contacts when SOS is activated.',
-                        style: TextStyle(
-                          fontSize: 7,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 10,
           ),
-
-          const SizedBox(height: 8),
-
-          Container(
-            height: 75,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE1E8F2),
-              borderRadius: BorderRadius.circular(7),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.location_on,
-                color: Colors.blue,
-                size: 30,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          _greyButton(
-            'Location Settings →',
-            () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==============================================================
-  // SETTINGS
-  // ==============================================================
-
-  Widget _settingsCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFD9DAE0),
         ),
       ),
-      child: Column(
-        children: [
-          _settingItem(
-            Icons.notifications_none,
-            'Notifications',
-          ),
-          _settingItem(
-            Icons.location_on_outlined,
-            'Location Services',
-          ),
-          _settingItem(
-            Icons.tune,
-            'Health Monitoring',
-          ),
-          _settingItem(
-            Icons.battery_saver_outlined,
-            'Battery Optimization',
-          ),
-          _settingItem(
-            Icons.sync,
-            'Sync Device',
-          ),
-          _settingItem(
-            Icons.help_outline,
-            'Help & Support',
-            last: true,
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _settingItem(
+  Widget _settingRow(
     IconData icon,
-    String title, {
-    bool last = false,
-  }) {
+    String title,
+  ) {
     return Container(
+      height: 48,
       padding: const EdgeInsets.symmetric(
         horizontal: 12,
-        vertical: 11,
       ),
-      decoration: BoxDecoration(
-        border: last
-            ? null
-            : const Border(
-                bottom: BorderSide(
-                  color: Color(0xFFE8E8EB),
-                ),
-              ),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Color(0xFFE9E9EC),
+          ),
+        ),
       ),
       child: Row(
         children: [
           Container(
-            width: 28,
-            height: 28,
+            width: 27,
+            height: 27,
             decoration: const BoxDecoration(
-              color: Color(0xFFF1F2F5),
+              color: Color(0xFFF1F2F4),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -740,8 +811,7 @@ class DevicesPage extends StatelessWidget {
             child: Text(
               title,
               style: const TextStyle(
-                fontSize: 10,
-                color: darkText,
+                fontSize: 11,
               ),
             ),
           ),
@@ -756,86 +826,185 @@ class DevicesPage extends StatelessWidget {
     );
   }
 
-  // ==============================================================
-  // COMMON CARD
-  // ==============================================================
+  // ============================================================
+  // BOTTOM NAV
+  // ============================================================
 
-  Widget _card({
-    required Widget child,
-  }) {
+  Widget _bottomNavigation(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(13),
+      height: 64,
+      margin: const EdgeInsets.only(
+        left: 12,
+        right: 12,
+        bottom: 8,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFD9DAE0),
-        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, -3),
+          ),
+        ],
       ),
-      child: child,
+      child: Row(
+        mainAxisAlignment:
+            MainAxisAlignment.spaceAround,
+        children: [
+          _bottomItem(
+            Icons.smart_toy_outlined,
+            'AI',
+            false,
+            () {},
+          ),
+
+          _bottomItem(
+            Icons.favorite_border,
+            'Health',
+            false,
+            () {},
+          ),
+
+          _bottomItem(
+            Icons.home_outlined,
+            'Home',
+            false,
+            () {},
+          ),
+
+          _bottomItem(
+            Icons.watch_outlined,
+            'Devices',
+            true,
+            () {},
+          ),
+
+          _bottomItem(
+            Icons.person_outline,
+            'Profile',
+            false,
+            () {},
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _greyButton(
-    String text,
+  Widget _bottomItem(
+    IconData icon,
+    String label,
+    bool selected,
     VoidCallback onTap,
   ) {
-    return SizedBox(
-      width: double.infinity,
-      height: 35,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFF3F4F6),
-          foregroundColor: darkText,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment:
+            MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 19,
+            color: selected
+                ? primaryBlue
+                : Colors.grey,
           ),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
+
+          const SizedBox(height: 3),
+
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 9,
+              color: selected
+                  ? primaryBlue
+                  : Colors.grey,
+              fontWeight: selected
+                  ? FontWeight.w600
+                  : FontWeight.normal,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-// ================================================================
-// HEART RATE LINE
-// ================================================================
+// ============================================================
+// HEART RATE GRAPH
+// ============================================================
 
-class _HeartLinePainter extends CustomPainter {
+class _HeartRatePainter extends CustomPainter {
   @override
   void paint(
     Canvas canvas,
     Size size,
   ) {
     final paint = Paint()
-      ..color = Colors.red
+      ..color = const Color(0xFFD43A48)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
     final path = Path();
 
-    path.moveTo(0, size.height * 0.55);
-    path.lineTo(size.width * 0.15, size.height * 0.55);
-    path.lineTo(size.width * 0.22, size.height * 0.10);
-    path.lineTo(size.width * 0.28, size.height * 0.85);
-    path.lineTo(size.width * 0.35, size.height * 0.55);
-    path.lineTo(size.width * 0.48, size.height * 0.55);
-    path.lineTo(size.width * 0.55, size.height * 0.15);
-    path.lineTo(size.width * 0.61, size.height * 0.85);
-    path.lineTo(size.width * 0.68, size.height * 0.55);
-    path.lineTo(size.width * 0.82, size.height * 0.55);
-    path.lineTo(size.width * 0.88, size.height * 0.15);
-    path.lineTo(size.width * 0.94, size.height * 0.85);
-    path.lineTo(size.width, size.height * 0.55);
+    path.moveTo(0, size.height * 0.65);
+
+    path.lineTo(
+      size.width * 0.15,
+      size.height * 0.65,
+    );
+
+    path.lineTo(
+      size.width * 0.23,
+      size.height * 0.25,
+    );
+
+    path.lineTo(
+      size.width * 0.29,
+      size.height * 0.82,
+    );
+
+    path.lineTo(
+      size.width * 0.37,
+      size.height * 0.65,
+    );
+
+    path.lineTo(
+      size.width * 0.52,
+      size.height * 0.65,
+    );
+
+    path.lineTo(
+      size.width * 0.59,
+      size.height * 0.25,
+    );
+
+    path.lineTo(
+      size.width * 0.65,
+      size.height * 0.82,
+    );
+
+    path.lineTo(
+      size.width * 0.73,
+      size.height * 0.65,
+    );
+
+    path.lineTo(
+      size.width * 0.88,
+      size.height * 0.65,
+    );
+
+    path.lineTo(
+      size.width * 0.94,
+      size.height * 0.28,
+    );
+
+    path.lineTo(
+      size.width,
+      size.height * 0.70,
+    );
 
     canvas.drawPath(path, paint);
   }

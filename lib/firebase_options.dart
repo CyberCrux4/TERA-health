@@ -54,14 +54,12 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB8PtdbNlaAeWz1atehgaAemxMNGrxxkWM',
-    appId: '1:671639752722:android:7ddd1b00e7c0d47fc288cb',
-    messagingSenderId: '671639752722',
-    projectId: 'aagis-1d4a5',
-    databaseURL: 'https://aagis-1d4a5-default-rtdb.firebaseio.com',
-    storageBucket: 'aagis-1d4a5.firebasestorage.app',
+    apiKey: 'AIzaSyAUIhTgKAplET3EMCkGnnB1RBPy0Dx0O4Q',
+    appId: '1:93161577759:android:19a6cc667c4bbc8fd1e42a',
+    messagingSenderId: '93161577759',
+    projectId: 'tera-health-database',
+    storageBucket: 'tera-health-database.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDxZ5zxd7BgWkQIT0DfsyS_tHtAXbdJkpk',
     appId: '1:671639752722:ios:5d26a72e2476d7edc288cb',

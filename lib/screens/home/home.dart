@@ -5,6 +5,7 @@ import '../AI/ai.dart';
 import '../health/health_overview.dart';
 import '../health/health_page.dart';
 import '../devices/devices_page.dart';
+import '../profile/profile.dart';
 
 
 class Home extends StatefulWidget {
@@ -1076,9 +1077,20 @@ class _HomeState extends State<Home>
           ),
 
           // PROFILE
-          _NavItem(
-            icon: Icons.person_outline,
-            label: 'Profile',
+           GestureDetector(
+            onTap: (){
+              Navigator.pushReplacement(
+                 context,
+                 MaterialPageRoute(
+                  builder: (context) => ProfilePage(),
+
+                 ),
+              );
+            },
+            child:  _BottomItem(
+              Icons.person_outline,
+              'profile',
+            ),
           ),
         ],
       ),

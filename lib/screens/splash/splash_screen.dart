@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import '../home/home.dart';
+import '../auth/login.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -30,19 +30,19 @@ class _SplashScreenState extends State<SplashScreen> {
       _controller.addListener(() {
         if (_controller.value.position >=
             _controller.value.duration) {
-          _goToHome();
+          _goToLogin();
         }
       });
     });
   }
 
-  void _goToHome() {
+  void _goToLogin() {
     if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const Home(),
+        builder: (context) => const LoginPage(),
       ),
     );
   }

@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+import 'package:tera_health/screens/devices/devices_page.dart';
+import 'package:tera_health/screens/health/health_page.dart';
+import 'package:tera_health/screens/home/home.dart';
+
+import '../../services/ai_services.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({super.key});
@@ -8,16 +15,39 @@ class AiPage extends StatefulWidget {
 }
 
 class _AiPageState extends State<AiPage> {
+  // ============================================================
+  // CONTROLLERS
+  // ============================================================
+
   final TextEditingController _messageController =
       TextEditingController();
 
   final ScrollController _scrollController = ScrollController();
+
+  // ============================================================
+  // SPEECH TO TEXT
+  // ============================================================
+
+  final stt.SpeechToText _speech = stt.SpeechToText();
+
+  bool _isListening = false;
+  bool _isLoading = false;
+
+  String _voiceText = '';
+
+  // ============================================================
+  // COLORS
+  // ============================================================
 
   static const Color primaryBlue = Color(0xFF4B4BD6);
   static const Color darkText = Color(0xFF182033);
   static const Color greyText = Color(0xFF777C88);
   static const Color aiBubble = Color(0xFFD8E2FF);
   static const Color userBubble = Color(0xFFF5F5F7);
+
+  // ============================================================
+  // INITIAL MESSAGES
+  // ============================================================
 
   final List<Map<String, String>> messages = [
     {
@@ -27,73 +57,248 @@ class _AiPageState extends State<AiPage> {
     {
       'type': 'ai',
       'text':
-          'Of course! 👋 I can help you\nunderstand your health\ninformation, explain your health\nreports, and answer general\nhealth questions.',
+          'Of course! 👋 I can help you\n'
+          'understand your health\n'
+          'information, explain your health\n'
+          'reports, and answer general\n'
+          'health questions.',
     },
     {
       'type': 'user',
-      'text':
-          'My heart rate is 78 BPM. What does\nit mean?',
+      'text': 'My heart rate is 78 BPM. What does\nit mean?',
     },
     {
       'type': 'ai',
       'text':
-          'A heart rate reading can vary\ndepending on activity and other\nfactors. I can help you\nunderstand the reading in\ncontext.',
+          'A heart rate reading can vary\n'
+          'depending on activity and other\n'
+          'factors. I can help you\n'
+          'understand the reading in\n'
+          'context.',
     },
   ];
+
+  // ============================================================
+  // DISPOSE
+  // ============================================================
 
   @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _speech.stop();
     super.dispose();
   }
 
   // ============================================================
+  // VOICE INPUT
+  // ============================================================
+
+ Future<void> _toggleVoice() async {
+  // ----------------------------------------------------------
+  // STOP LISTENING
+  // ----------------------------------------------------------
+
+  if (_isListening) {
+    try {
+      await _speech.stop();
+    } catch (e) {
+      debugPrint('Speech stop error: $e');
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _isListening = false;
+    });
+
+    return;
+  }
+
+  // ----------------------------------------------------------
+  // INITIALIZE SPEECH
+  // ----------------------------------------------------------
+
+  try {
+    final available = await _speech.initialize(
+      onStatus: (status) {
+        debugPrint('Speech status: $status');
+
+        if (!mounted) return;
+
+        if (status == 'done' ||
+            status == 'notListening') {
+          setState(() {
+            _isListening = false;
+          });
+        }
+      },
+      onError: (error) {
+        debugPrint(
+          'Speech error: ${error.errorMsg}',
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _isListening = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Voice error: ${error.errorMsg}',
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!available) {
+      if (!mounted) return;
+
+      setState(() {
+        _isListening = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Speech recognition is not available on this device.',
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // START LISTENING
+    // ----------------------------------------------------------
+
+    if (!mounted) return;
+
+    setState(() {
+      _isListening = true;
+      _voiceText = '';
+    });
+
+    await _speech.listen(
+      onResult: (result) {
+        if (!mounted) return;
+
+        final recognizedText =
+            result.recognizedWords;
+
+        setState(() {
+          _voiceText = recognizedText;
+
+          _messageController.text =
+              recognizedText;
+
+          _messageController.selection =
+              TextSelection.fromPosition(
+            TextPosition(
+              offset: _messageController.text.length,
+            ),
+          );
+        });
+      },
+    );
+  } catch (e, stackTrace) {
+    debugPrint('VOICE ERROR: $e');
+    debugPrintStack(stackTrace: stackTrace);
+
+    if (!mounted) return;
+
+    setState(() {
+      _isListening = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Could not start voice recognition: $e',
+        ),
+      ),
+    );
+  }
+}
+  // ============================================================
   // SEND MESSAGE
   // ============================================================
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
 
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isLoading) {
+      return;
+    }
 
     setState(() {
       messages.add({
         'type': 'user',
         'text': text,
       });
+
+      _isLoading = true;
     });
 
     _messageController.clear();
 
-    // Temporary MVP response
-    Future.delayed(const Duration(milliseconds: 500), () {
+    _scrollToBottom();
+
+    try {
+      final response = await AiService.askAi(text);
+
+      if (!mounted) return;
+
+      setState(() {
+        messages.add({
+          'type': 'ai',
+          'text': response,
+        });
+
+        _isLoading = false;
+      });
+
+      _scrollToBottom();
+    } catch (e) {
       if (!mounted) return;
 
       setState(() {
         messages.add({
           'type': 'ai',
           'text':
-              'I understand. I can help you understand this health information in a simple way.',
+              'Sorry, I could not process your request right now.',
         });
+
+        _isLoading = false;
       });
 
       _scrollToBottom();
-    });
-
-    _scrollToBottom();
+    }
   }
 
-  void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (!_scrollController.hasClients) return;
+  // ============================================================
+  // SCROLL
+  // ============================================================
 
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    });
+  void _scrollToBottom() {
+    Future.delayed(
+      const Duration(milliseconds: 100),
+      () {
+        if (!_scrollController.hasClients) {
+          return;
+        }
+
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      },
+    );
   }
 
   // ============================================================
@@ -143,12 +348,10 @@ class _AiPageState extends State<AiPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
-
       body: SafeArea(
         child: Column(
           children: [
             _header(),
-
             _educationBanner(),
 
             Expanded(
@@ -172,8 +375,36 @@ class _AiPageState extends State<AiPage> {
               ),
             ),
 
-            _inputArea(),
+            if (_isLoading)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(
+                  left: 25,
+                  bottom: 5,
+                ),
+                child: const Row(
+                  children: [
+                    SizedBox(
+                      width: 15,
+                      height: 15,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: primaryBlue,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'TERA is thinking...',
+                      style: TextStyle(
+                        color: greyText,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
+            _inputArea(),
             _bottomNavigation(),
           ],
         ),
@@ -188,7 +419,9 @@ class _AiPageState extends State<AiPage> {
   Widget _header() {
     return Container(
       height: 57,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 18,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -199,10 +432,15 @@ class _AiPageState extends State<AiPage> {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 22,
-            color: primaryBlue,
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 22,
+              color: primaryBlue,
+            ),
           ),
 
           const Spacer(),
@@ -315,19 +553,28 @@ class _AiPageState extends State<AiPage> {
 
     return Align(
       alignment:
-          isAI ? Alignment.centerLeft : Alignment.centerRight,
+          isAI
+              ? Alignment.centerLeft
+              : Alignment.centerRight,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 18),
+        padding: const EdgeInsets.only(
+          bottom: 18,
+        ),
         child: Row(
           mainAxisAlignment:
-              isAI ? MainAxisAlignment.start : MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
+              isAI
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.end,
+          crossAxisAlignment:
+              CrossAxisAlignment.end,
           children: [
-            if (isAI) ...[
+            if (isAI)
               Container(
                 width: 34,
                 height: 34,
-                margin: const EdgeInsets.only(right: 8),
+                margin: const EdgeInsets.only(
+                  right: 8,
+                ),
                 decoration: const BoxDecoration(
                   color: primaryBlue,
                   shape: BoxShape.circle,
@@ -338,7 +585,6 @@ class _AiPageState extends State<AiPage> {
                   size: 20,
                 ),
               ),
-            ],
 
             Flexible(
               child: Container(
@@ -350,26 +596,43 @@ class _AiPageState extends State<AiPage> {
                   vertical: 13,
                 ),
                 decoration: BoxDecoration(
-                  color: isAI ? aiBubble : userBubble,
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(16),
-                    topRight: const Radius.circular(16),
+                  color:
+                      isAI
+                          ? aiBubble
+                          : userBubble,
+                  borderRadius:
+                      BorderRadius.only(
+                    topLeft:
+                        const Radius.circular(16),
+                    topRight:
+                        const Radius.circular(16),
                     bottomLeft:
-                        Radius.circular(isAI ? 5 : 16),
+                        Radius.circular(
+                      isAI ? 5 : 16,
+                    ),
                     bottomRight:
-                        Radius.circular(isAI ? 16 : 5),
+                        Radius.circular(
+                      isAI ? 16 : 5,
+                    ),
                   ),
-                  border: isAI
-                      ? null
-                      : Border.all(
-                          color: const Color(0xFFD0D1D8),
-                        ),
+                  border:
+                      isAI
+                          ? null
+                          : Border.all(
+                              color:
+                                  const Color(
+                                0xFFD0D1D8,
+                              ),
+                            ),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     Text(
-                      text,
+                      text.isEmpty
+                          ? '...'
+                          : text,
                       style: const TextStyle(
                         fontSize: 16,
                         height: 1.45,
@@ -382,10 +645,14 @@ class _AiPageState extends State<AiPage> {
                           'understand the reading',
                         ))
                       Padding(
-                        padding: const EdgeInsets.only(top: 12),
+                        padding:
+                            const EdgeInsets.only(
+                          top: 12,
+                        ),
                         child: _actionButton(
                           'Analyze Heart Data',
-                          Icons.monitor_heart_outlined,
+                          Icons
+                              .monitor_heart_outlined,
                         ),
                       ),
                   ],
@@ -407,15 +674,18 @@ class _AiPageState extends State<AiPage> {
     IconData icon,
   ) {
     return GestureDetector(
-      onTap: () => _predefinedAction(title),
+      onTap: () =>
+          _predefinedAction(title),
       child: Container(
-        padding: const EdgeInsets.symmetric(
+        padding:
+            const EdgeInsets.symmetric(
           horizontal: 13,
           vertical: 8,
         ),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius:
+              BorderRadius.circular(20),
           boxShadow: const [
             BoxShadow(
               color: Color(0x12000000),
@@ -425,7 +695,8 @@ class _AiPageState extends State<AiPage> {
           ],
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize:
+              MainAxisSize.min,
           children: [
             Icon(
               icon,
@@ -438,7 +709,8 @@ class _AiPageState extends State<AiPage> {
               style: const TextStyle(
                 color: primaryBlue,
                 fontSize: 13,
-                fontWeight: FontWeight.w500,
+                fontWeight:
+                    FontWeight.w500,
               ),
             ),
           ],
@@ -453,7 +725,8 @@ class _AiPageState extends State<AiPage> {
 
   Widget _inputArea() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(
+      padding:
+          const EdgeInsets.fromLTRB(
         20,
         8,
         20,
@@ -462,65 +735,120 @@ class _AiPageState extends State<AiPage> {
       color: Colors.white,
       child: Container(
         height: 62,
-        padding: const EdgeInsets.only(
+        padding:
+            const EdgeInsets.only(
           left: 18,
           right: 7,
         ),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius:
+              BorderRadius.circular(32),
           border: Border.all(
-            color: const Color(0xFFC9CBD4),
+            color: const Color(
+              0xFFC9CBD4,
+            ),
           ),
         ),
         child: Row(
           children: [
             Expanded(
               child: TextField(
-                controller: _messageController,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _sendMessage(),
-                decoration: const InputDecoration(
-                  hintText: 'Ask TERA anything...',
-                  hintStyle: TextStyle(
-                    color: Color(0xFF8A8D98),
+                controller:
+                    _messageController,
+                textInputAction:
+                    TextInputAction.send,
+                onSubmitted:
+                    (_) => _sendMessage(),
+                decoration:
+                    const InputDecoration(
+                  hintText:
+                      'Ask TERA anything...',
+                  hintStyle:
+                      TextStyle(
+                    color:
+                        Color(0xFF8A8D98),
                     fontSize: 15,
                   ),
-                  border: InputBorder.none,
+                  border:
+                      InputBorder.none,
                 ),
               ),
             ),
 
             const Icon(
               Icons.camera_alt_outlined,
-              color: Color(0xFF686B75),
+              color:
+                  Color(0xFF686B75),
               size: 23,
             ),
 
             const SizedBox(width: 13),
 
-            const Icon(
-              Icons.mic_none_rounded,
-              color: Color(0xFF686B75),
-              size: 24,
+            // ==================================================
+            // MICROPHONE
+            // ==================================================
+
+            GestureDetector(
+              onTap: _isLoading
+                  ? null
+                  : _toggleVoice,
+              child: Icon(
+                _isListening
+                    ? Icons.mic_rounded
+                    : Icons
+                        .mic_none_rounded,
+                color:
+                    _isListening
+                        ? primaryBlue
+                        : const Color(
+                            0xFF686B75,
+                          ),
+                size: 24,
+              ),
             ),
 
             const SizedBox(width: 8),
 
+            // ==================================================
+            // SEND BUTTON
+            // ==================================================
+
             GestureDetector(
-              onTap: _sendMessage,
+              onTap:
+                  _isLoading
+                      ? null
+                      : _sendMessage,
               child: Container(
                 width: 40,
                 height: 40,
-                decoration: const BoxDecoration(
+                decoration:
+                    const BoxDecoration(
                   color: primaryBlue,
-                  shape: BoxShape.circle,
+                  shape:
+                      BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child:
+                    _isLoading
+                        ? const Padding(
+                            padding:
+                                EdgeInsets.all(
+                              10,
+                            ),
+                            child:
+                                CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color:
+                                  Colors.white,
+                            ),
+                          )
+                        : const Icon(
+                            Icons
+                                .arrow_forward_rounded,
+                            color:
+                                Colors.white,
+                            size: 24,
+                          ),
               ),
             ),
           ],
@@ -536,7 +864,8 @@ class _AiPageState extends State<AiPage> {
   Widget _bottomNavigation() {
     return Container(
       height: 66,
-      decoration: const BoxDecoration(
+      decoration:
+          const BoxDecoration(
         color: Colors.white,
         border: Border(
           top: BorderSide(
@@ -545,64 +874,128 @@ class _AiPageState extends State<AiPage> {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment:
+            MainAxisAlignment.spaceAround,
         children: [
           _navItem(
             Icons.smart_toy_outlined,
             'AI',
             true,
+            onTap: () {},
           ),
+
           _navItem(
             Icons.favorite_border,
             'Health',
             false,
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          const HealthPage(),
+                ),
+              );
+            },
           ),
+
           _navItem(
             Icons.home_outlined,
             'Home',
             false,
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          const Home(),
+                ),
+              );
+            },
           ),
+
           _navItem(
             Icons.watch_outlined,
             'Devices',
             false,
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          const DevicesPage(),
+                ),
+              );
+            },
           ),
+
           _navItem(
             Icons.person_outline,
             'Profile',
             false,
+            onTap: () {},
           ),
         ],
       ),
     );
   }
 
+  // ============================================================
+  // NAV ITEM
+  // ============================================================
+
   Widget _navItem(
     IconData icon,
     String label,
-    bool selected,
-  ) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          size: 23,
-          color: selected
-              ? const Color(0xFF41414A)
-              : const Color(0xFF4D515A),
+    bool selected, {
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior:
+          HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 62,
+        height: 66,
+        child: Column(
+          mainAxisAlignment:
+              MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 23,
+              color:
+                  selected
+                      ? primaryBlue
+                      : const Color(
+                          0xFF4D515A,
+                        ),
+            ),
+
+            const SizedBox(height: 3),
+
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight:
+                    selected
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                color:
+                    selected
+                        ? primaryBlue
+                        : const Color(
+                            0xFF3F424B,
+                          ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 3),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight:
-                selected ? FontWeight.w700 : FontWeight.w500,
-            color: const Color(0xFF3F424B),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

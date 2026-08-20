@@ -1,33 +1,13 @@
 {
   "project_info": {
-    "project_number": "671639752722",
-    "firebase_url": "https://aagis-1d4a5-default-rtdb.firebaseio.com",
-    "project_id": "aagis-1d4a5",
-    "storage_bucket": "aagis-1d4a5.firebasestorage.app"
+    "project_number": "93161577759",
+    "project_id": "tera-health-database",
+    "storage_bucket": "tera-health-database.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:671639752722:android:9b58f5d98bcc554fc288cb",
-        "android_client_info": {
-          "package_name": "com.aagis.app"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyB8PtdbNlaAeWz1atehgaAemxMNGrxxkWM"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:671639752722:android:7ddd1b00e7c0d47fc288cb",
+        "mobilesdk_app_id": "1:93161577759:android:19a6cc667c4bbc8fd1e42a",
         "android_client_info": {
           "package_name": "com.example.tera_health"
         }
@@ -35,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB8PtdbNlaAeWz1atehgaAemxMNGrxxkWM"
+          "current_key": "AIzaSyAUIhTgKAplET3EMCkGnnB1RBPy0Dx0O4Q"
         }
       ],
       "services": {
